@@ -41,6 +41,10 @@ func (pInst *CWJBWSP_Parser1) CommandSend2(cmd1, cmd2, cmd3 byte) error {
 	_, err := pInst.DataSend(cmd1, cmd2, cmd3, 0, nil)
 	return err
 }
+func (pInst *CWJBWSP_Parser1) CommandSend3(cmd1, cmd2, cmd3 byte) error {
+	_, err := pInst.DataSend(cmd1, cmd2, cmd3, pInst.parseData.RequestID, nil)
+	return err
+}
 
 func (pInst *CWJBWSP_Parser1) DataSend(cmd1, cmd2, cmd3 byte, requestid uint16, data []byte) (int, error) {
 	datalen := 0
@@ -66,4 +70,7 @@ func (pInst *CWJBWSP_Parser1) DataSend(cmd1, cmd2, cmd3 byte, requestid uint16, 
 }
 func (pInst *CWJBWSP_Parser1) DataSend2(cmd1, cmd2, cmd3 byte, data []byte) (int, error) {
 	return pInst.DataSend(cmd1, cmd2, cmd3, 0, data)
+}
+func (pInst *CWJBWSP_Parser1) DataSend3(cmd1, cmd2, cmd3 byte, data []byte) (int, error) {
+	return pInst.DataSend(cmd1, cmd2, cmd3, pInst.parseData.RequestID, data)
 }
