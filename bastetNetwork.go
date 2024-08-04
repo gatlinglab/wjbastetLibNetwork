@@ -20,17 +20,23 @@ func WJBWSP_CreateParser1(socket gatlingWSProtocol.IWJSocket) *CWJBWSP_Parser1 {
 	return &CWJBWSP_Parser1{}
 }
 
-func (pInst *CWJBWSP_Parser1) DataParse(data []byte) (*CWJBWSP_ParseData1, int) {
+func (pInst *CWJBWSP_Parser1) DataParse(data []byte, result *CWJBWSP_ParseData1) int {
 	datalen := len(data)
 	if datalen < WJBP_LengthBasicData {
-		return nil, -1
+		return -1
 	}
-	pInst.parseData.RequestID = uint16(data[0])<<8 | uint16(data[1])
-	pInst.parseData.CMD1 = data[WJBP_OffsetCommand1]
-	pInst.parseData.CMD2 = data[WJBP_OffsetCommand2]
-	pInst.parseData.CMD3 = data[WJBP_OffsetCommand3]
+	result.RequestID = uint16(data[0])<<8 | uint16(data[1])
+	result.CMD1 = data[WJBP_OffsetCommand1]
+	result.CMD2 = data[WJBP_OffsetCommand2]
+	result.CMD3 = data[WJBP_OffsetCommand3]
 
-	return &pInst.parseData, WJBP_LengthBasicData
+	// the rest data is data[WJBP_LengthBasicData:]
+	return WJBP_LengthBasicData
+}
+func (pInst *CWJBWSP_Parser1) DataParseDefault(data []byte) (*CWJBWSP_ParseData1, int) {
+	iRet := pInst.DataParse(data, &pInst.parseData)
+
+	return &pInst.parseData, iRet
 	// the rest data is data[WJBP_LengthBasicData:]
 }
 func (pInst *CWJBWSP_Parser1) CommandSend(cmd1, cmd2, cmd3 byte, requestid uint16) error {
@@ -41,8 +47,8 @@ func (pInst *CWJBWSP_Parser1) CommandSend2(cmd1, cmd2, cmd3 byte) error {
 	_, err := pInst.DataSend(cmd1, cmd2, cmd3, 0, nil)
 	return err
 }
-func (pInst *CWJBWSP_Parser1) CommandSend3(cmd1, cmd2, cmd3 byte) error {
-	_, err := pInst.DataSend(cmd1, cmd2, cmd3, pInst.parseData.RequestID, nil)
+func (pInst *CWJBWSP_Parser1) CommandSend3(cmd3 byte, parseData *CWJBWSP_ParseData1) error {
+	_, err := pInst.DataSend(parseData.CMD1, parseData.CMD2, cmd3, parseData.RequestID, nil)
 	return err
 }
 
@@ -71,6 +77,6 @@ func (pInst *CWJBWSP_Parser1) DataSend(cmd1, cmd2, cmd3 byte, requestid uint16, 
 func (pInst *CWJBWSP_Parser1) DataSend2(cmd1, cmd2, cmd3 byte, data []byte) (int, error) {
 	return pInst.DataSend(cmd1, cmd2, cmd3, 0, data)
 }
-func (pInst *CWJBWSP_Parser1) DataSend3(cmd1, cmd2, cmd3 byte, data []byte) (int, error) {
-	return pInst.DataSend(cmd1, cmd2, cmd3, pInst.parseData.RequestID, data)
+func (pInst *CWJBWSP_Parser1) DataSend3(cmd3 byte, data []byte, parseData *CWJBWSP_ParseData1) (int, error) {
+	return pInst.DataSend(parseData.CMD1, parseData.CMD2, cmd3, parseData.RequestID, data)
 }
