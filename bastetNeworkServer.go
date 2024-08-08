@@ -7,7 +7,7 @@ import (
 )
 
 type CWJBWSP_ServerParseData1 struct {
-	dataFlag  uint64
+	DataFlag  uint64
 	RequestID uint16
 	CMD1      byte
 	CMD2      byte
@@ -34,7 +34,7 @@ func (pInst *CWJBWSP_ServerParser1) DataParse(data []byte, result *CWJBWSP_Serve
 		return -1
 	}
 
-	result.dataFlag = binary.LittleEndian.Uint64(data)
+	result.DataFlag = binary.LittleEndian.Uint64(data)
 	result.RequestID = uint16(data[dWJBP_ServerOffsetRequest])<<8 | uint16(data[dWJBP_ServerOffsetRequest+1])
 	result.CMD1 = data[dWJBP_ServerOffsetCommand1]
 	result.CMD2 = data[dWJBP_ServerOffsetCommand2]
