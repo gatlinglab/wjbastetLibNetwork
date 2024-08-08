@@ -15,12 +15,17 @@ type CWJBWSP_ServerParseData1 struct {
 }
 
 type CWJBWSP_ServerParser1 struct {
-	parseData CWJBWSP_ServerParseData1
-	sock      gatlingWSProtocol.IWJSocket
+	defaultDataPointer uint64
+	parseData          CWJBWSP_ServerParseData1
+	sock               gatlingWSProtocol.IWJSocket
 }
 
 func WJBWSP_CreateServerParser1(socket gatlingWSProtocol.IWJSocket) *CWJBWSP_ServerParser1 {
 	return &CWJBWSP_ServerParser1{}
+}
+
+func (pInst *CWJBWSP_ServerParser1) SetDefaultDataPointer(dataPoint uint64) {
+	pInst.defaultDataPointer = dataPoint
 }
 
 func (pInst *CWJBWSP_ServerParser1) DataParse(data []byte, result *CWJBWSP_ServerParseData1) int {
@@ -44,26 +49,26 @@ func (pInst *CWJBWSP_ServerParser1) DataParseDefault(data []byte) (*CWJBWSP_Serv
 	return &pInst.parseData, iRet
 	// the rest data is data[WJBP_LengthBasicData:]
 }
-func (pInst *CWJBWSP_ServerParser1) CommandSend(dataPointer uint64, cmd1, cmd2, cmd3 byte, requestid uint16) error {
-	_, err := pInst.DataSend(dataPointer, cmd1, cmd2, cmd3, requestid, nil)
+func (pInst *CWJBWSP_ServerParser1) CommandSend(cmd1, cmd2, cmd3 byte, requestid uint16) error {
+	_, err := pInst.DataSend(cmd1, cmd2, cmd3, requestid, nil)
 	return err
 }
-func (pInst *CWJBWSP_ServerParser1) CommandSend2(dataPointer uint64, cmd1, cmd2, cmd3 byte) error {
-	_, err := pInst.DataSend(dataPointer, cmd1, cmd2, cmd3, 0, nil)
+func (pInst *CWJBWSP_ServerParser1) CommandSend2(cmd1, cmd2, cmd3 byte) error {
+	_, err := pInst.DataSend(cmd1, cmd2, cmd3, 0, nil)
 	return err
 }
-func (pInst *CWJBWSP_ServerParser1) CommandSend3(dataPointer uint64, cmd3 byte, parseData *CWJBWSP_ServerParseData1) error {
-	_, err := pInst.DataSend(dataPointer, parseData.CMD1, parseData.CMD2, cmd3, parseData.RequestID, nil)
+func (pInst *CWJBWSP_ServerParser1) CommandSend3(cmd3 byte, parseData *CWJBWSP_ServerParseData1) error {
+	_, err := pInst.DataSend(parseData.CMD1, parseData.CMD2, cmd3, parseData.RequestID, nil)
 	return err
 }
 
-func (pInst *CWJBWSP_ServerParser1) DataSend(dataPointer uint64, cmd1, cmd2, cmd3 byte, requestid uint16, data []byte) (int, error) {
+func (pInst *CWJBWSP_ServerParser1) DataSend(cmd1, cmd2, cmd3 byte, requestid uint16, data []byte) (int, error) {
 	datalen := 0
 	if data != nil {
 		datalen = len(data)
 	}
 	dataSend := make([]byte, dWJBP_ServerLengthBasicData+datalen)
-	binary.LittleEndian.PutUint64(dataSend, dataPointer)
+	binary.LittleEndian.PutUint64(dataSend, pInst.defaultDataPointer)
 	if requestid != 0 {
 		dataSend[0] = byte(requestid >> 8)
 		dataSend[1] = byte(requestid)
@@ -80,9 +85,9 @@ func (pInst *CWJBWSP_ServerParser1) DataSend(dataPointer uint64, cmd1, cmd2, cmd
 
 	return datalen, err
 }
-func (pInst *CWJBWSP_ServerParser1) DataSend2(dataPointer uint64, cmd1, cmd2, cmd3 byte, data []byte) (int, error) {
-	return pInst.DataSend(dataPointer, cmd1, cmd2, cmd3, 0, data)
+func (pInst *CWJBWSP_ServerParser1) DataSend2(cmd1, cmd2, cmd3 byte, data []byte) (int, error) {
+	return pInst.DataSend(cmd1, cmd2, cmd3, 0, data)
 }
-func (pInst *CWJBWSP_ServerParser1) DataSend3(dataPointer uint64, cmd3 byte, data []byte, parseData *CWJBWSP_ServerParseData1) (int, error) {
-	return pInst.DataSend(dataPointer, parseData.CMD1, parseData.CMD2, cmd3, parseData.RequestID, data)
+func (pInst *CWJBWSP_ServerParser1) DataSend3(cmd3 byte, data []byte, parseData *CWJBWSP_ServerParseData1) (int, error) {
+	return pInst.DataSend(parseData.CMD1, parseData.CMD2, cmd3, parseData.RequestID, data)
 }
