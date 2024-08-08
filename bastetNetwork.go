@@ -22,16 +22,16 @@ func WJBWSP_CreateParser1(socket gatlingWSProtocol.IWJSocket) *CWJBWSP_Parser1 {
 
 func (pInst *CWJBWSP_Parser1) DataParse(data []byte, result *CWJBWSP_ParseData1) int {
 	datalen := len(data)
-	if datalen < WJBP_LengthBasicData {
+	if datalen < dWJBP_LengthBasicData {
 		return -1
 	}
-	result.RequestID = uint16(data[0])<<8 | uint16(data[1])
-	result.CMD1 = data[WJBP_OffsetCommand1]
-	result.CMD2 = data[WJBP_OffsetCommand2]
-	result.CMD3 = data[WJBP_OffsetCommand3]
+	result.RequestID = uint16(data[dWJBP_OffsetRequest])<<8 | uint16(data[dWJBP_OffsetRequest+1])
+	result.CMD1 = data[dWJBP_OffsetCommand1]
+	result.CMD2 = data[dWJBP_OffsetCommand2]
+	result.CMD3 = data[dWJBP_OffsetCommand3]
 
 	// the rest data is data[WJBP_LengthBasicData:]
-	return WJBP_LengthBasicData
+	return dWJBP_LengthBasicData
 }
 func (pInst *CWJBWSP_Parser1) DataParseDefault(data []byte) (*CWJBWSP_ParseData1, int) {
 	iRet := pInst.DataParse(data, &pInst.parseData)
@@ -57,17 +57,17 @@ func (pInst *CWJBWSP_Parser1) DataSend(cmd1, cmd2, cmd3 byte, requestid uint16, 
 	if data != nil {
 		datalen = len(data)
 	}
-	dataSend := make([]byte, WJBP_LengthBasicData+datalen)
+	dataSend := make([]byte, dWJBP_LengthBasicData+datalen)
 	if requestid != 0 {
 		dataSend[0] = byte(requestid >> 8)
 		dataSend[1] = byte(requestid)
 	}
-	dataSend[WJBP_OffsetCommand1] = cmd1
-	dataSend[WJBP_OffsetCommand2] = cmd2
-	dataSend[WJBP_OffsetCommand3] = cmd3
+	dataSend[dWJBP_OffsetCommand1] = cmd1
+	dataSend[dWJBP_OffsetCommand2] = cmd2
+	dataSend[dWJBP_OffsetCommand3] = cmd3
 
 	if data != nil {
-		copy(dataSend[WJBP_LengthBasicData:], data)
+		copy(dataSend[dWJBP_LengthBasicData:], data)
 	}
 
 	err := pInst.sock.WriteBinary(dataSend)
