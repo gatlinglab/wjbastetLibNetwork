@@ -17,7 +17,7 @@ type CWJBWSP_Parser1 struct {
 }
 
 func WJBWSP_CreateParser1(socket gatlingWSProtocol.IWJSocket) *CWJBWSP_Parser1 {
-	return &CWJBWSP_Parser1{}
+	return &CWJBWSP_Parser1{sock: socket}
 }
 
 func (pInst *CWJBWSP_Parser1) DataParse(data []byte, result *CWJBWSP_ParseData1) int {
